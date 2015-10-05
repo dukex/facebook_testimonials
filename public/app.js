@@ -33,7 +33,9 @@ var MyTestimonials = React.createClass({
   },
 
   componentDidMount: function () {
-    fetch("/me")
+    fetch("/me", {
+        credentials: 'include'
+      })
       .then(checkStatus)
       .then(parseJSON)
       .then(function(data) {
@@ -78,6 +80,7 @@ var Box = React.createClass({
   render: function () {
     return (
       <div className="depo-box">
+        {this.props.user}
         {this.props.children}
         <TestimonialList user={this.props.user}/>
       </div>
@@ -98,26 +101,25 @@ var TestimonialForm = React.createClass({
 var TestimonialList = React.createClass({
   loadTestimonialsFromServer: function () {
     if (this.props.user && this.props.user.id) {
-      fetch("/testimonials/" + this.props.user.id)
+      fetch("/testimonials/" + this.props.user.id, {
+        credentials: 'include'
+      })
       .then(checkStatus)
       .then(parseJSON)
       .then(function(data) {
         if (this.isMounted()) {
           this.setState(data);
-          this.pollInterval = 3000;
         }
       }.bind(this));
     }
   },
-  pollInterval: 1000,
+  pollInterval: 4000,
   getInitialState: function () {
     return { testimonials: [] }
   },
-  componentDidMount: function () {
-    this.loadTestimonialsFromServer();
-    setInterval(this.loadTestimonialsFromServer, this.pollInterval);
-  },
   render: function () {
+    this.loadTestimonialsFromServer();
+
     var testimonials = this.state.testimonials.map(function (testimonial) {
       return (
         <Testimonial key={testimonial.id} testimonial={testimonial} />
